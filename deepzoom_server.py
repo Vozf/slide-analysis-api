@@ -7,6 +7,8 @@ from optparse import OptionParser
 import re
 from unicodedata import normalize
 
+from crossdomain import crossdomain
+
 DEEPZOOM_SLIDE = '/home/vozman/Pictures/46433.svs'
 DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 254
@@ -60,12 +62,14 @@ def index():
     slide_url = url_for('dzi', slug=SLIDE_NAME)
     associated_urls = dict((name, url_for('dzi', slug=slugify(name)))
                            for name in app.associated_images)
+    print(slide_url, associated_urls,app.slide_properties, app.slide_mpp)
     return render_template('slide-multipane.html', slide_url=slide_url,
                            associated=associated_urls, properties=app.slide_properties,
                            slide_mpp=app.slide_mpp)
 
 
 @app.route('/<slug>.dzi')
+@crossdomain(origin='*')
 def dzi(slug):
     format = app.config['DEEPZOOM_FORMAT']
     try:

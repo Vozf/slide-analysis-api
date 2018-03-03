@@ -28,7 +28,7 @@ import os
 from optparse import OptionParser
 from threading import Lock
 
-SLIDE_DIR = '.'
+SLIDE_DIR = '/home/vozman/Pictures/'
 SLIDE_CACHE_SIZE = 10
 DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 254
@@ -110,6 +110,14 @@ def _setup():
     }
     opts = dict((v, app.config[k]) for k, v in config_map.items())
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
+
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 
 def _get_slide(path):

@@ -1,7 +1,7 @@
 # export PYTHONPATH="${PYTHONPATH}:/home/vozman/projects/slides/slide-analysis-service"
 
 from collections import OrderedDict
-from flask import Flask, abort, make_response, jsonify
+from flask import Flask, abort, make_response, jsonify, request
 from io import BytesIO
 from openslide import OpenSlide, OpenSlideError
 from openslide.deepzoom import DeepZoomGenerator
@@ -62,7 +62,7 @@ def _get_slides(basedir, relpath=''):
 def _setup():
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'])
-    app.slide_analysis_service = SlideAnalysisService
+    app.slide_analysis_service = SlideAnalysisService()
 
 
 @app.after_request
@@ -104,7 +104,17 @@ def dzi(path):
 
 @app.route('/image/<path:path>/similar', methods=['POST'])
 def find_similar(path):
-    pass
+    body = request.get_json()
+    img_path = os.path.abspath(os.path.join(app.basedir, path))
+    slide = app.slide_analysis_service.get_slide(img_path,
+                                           app.slide_analysis_service.get_descriptors()[1]())
+    if not slide.is_ready():
+        slide.precalculate()
+
+    similar = slide.find((body["x"], body["y"], body["width"], body["height"]),
+                         app.slide_analysis_service.get_similarities()[1]())
+
+    return jsonify(similar["top_n"])
 
 
 @app.route('/image/<path:path>_files/<int:level>/<int:col>_<int:row>.<format>')
