@@ -9,7 +9,7 @@ from unicodedata import normalize
 
 from crossdomain import crossdomain
 
-DEEPZOOM_SLIDE = '/home/vozman/Pictures/46433.svs'
+DEEPZOOM_SLIDE = '/home/roskach/Whole Slides/Tumor_017.tif'
 DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 254
 DEEPZOOM_OVERLAP = 1

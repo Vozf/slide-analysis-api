@@ -1,8 +1,10 @@
-# export PYTHONPATH="${PYTHONPATH}:/home/vozman/projects/slides/slide-analysis-service"
+# export PYTHONPATH="${PYTHONPATH}:/home/roskach/PycharmProjects/slide-analysis-service"
 
 from collections import OrderedDict
-from flask import Flask, abort, make_response, jsonify, request
-from io import BytesIO
+
+from PIL import Image
+from flask import Flask, abort, make_response, jsonify, request, send_file, send_from_directory
+from io import BytesIO, StringIO
 from openslide import OpenSlide, OpenSlideError
 from openslide.deepzoom import DeepZoomGenerator
 import os
@@ -10,7 +12,9 @@ from optparse import OptionParser
 from threading import Lock
 from slide_analysis_service.interface import SlideAnalysisService
 
-SLIDE_DIR = '/home/vozman/Pictures/'
+from constants import SIMILARITY_MAP_PATH
+
+SLIDE_DIR = '/home/roskach/Whole Slides/'
 SLIDE_CACHE_SIZE = 10
 DEEPZOOM_FORMAT = 'jpeg'
 
@@ -53,8 +57,7 @@ def _get_slides(basedir, relpath=''):
             if cur_dir:
                 children.append(cur_dir)
         elif OpenSlide.detect_format(cur_path):
-            children.append({"name": os.path.basename(cur_path), "url_path": cur_path})
-
+            children.append({"name": os.path.basename(cur_path)})
     return children
 
 
@@ -93,6 +96,16 @@ def index():
     return jsonify(_get_slides(app.basedir))
 
 
+@app.route('/images/<path:filename>')
+def get_preview(filename):
+    img_io = BytesIO()
+    osr = OpenSlide(SLIDE_DIR + '/' + filename)
+    osr.get_thumbnail((500, 500)).save(img_io, 'JPEG')
+    resp = make_response(img_io.getvalue())
+    resp.mimetype = 'image/jpg'
+    return resp
+
+
 @app.route('/image/<path:path>')
 def dzi(path):
     slide = _get_slide(path)
@@ -113,8 +126,39 @@ def find_similar(path):
 
     similar = slide.find((body["x"], body["y"], body["width"], body["height"]),
                          app.slide_analysis_service.get_similarities()[1]())
+    coordinates = []
 
-    return jsonify(similar["top_n"])
+    similar['sim_map'].save(SIMILARITY_MAP_PATH)
+
+    for similar_tile in similar["top_n"]:
+        coordinates.append({"x": str(similar_tile[0]), "y": str(similar_tile[1])})
+
+    return jsonify(coordinates)
+
+
+@app.route('/image/<path:path>/similar/<int:col>_<int:row>')
+def get_similar_tile(path, col, row):
+    img_path = os.path.abspath(os.path.join(app.basedir, path))
+    try:
+        tile = app.slide_analysis_service.get_tile(img_path, col, row)
+    except ValueError:
+        # Invalid level orname coordinates
+        abort(404)
+    buf = BytesIO()
+    tile.save(buf, 'JPEG')
+    resp = make_response(buf.getvalue())
+    resp.mimetype = 'image/jpg'
+    return resp
+
+
+@app.route('/image/similar/map')
+def get_similarity_map():
+    buf = BytesIO()
+    map = Image.open(SIMILARITY_MAP_PATH)
+    map.save(buf, 'JPEG')
+    resp = make_response(buf.getvalue())
+    resp.mimetype = 'image/jpg'
+    return resp
 
 
 @app.route('/image/<path:path>_files/<int:level>/<int:col>_<int:row>.<format>')
