@@ -1,0 +1,4 @@
+flask
+openslide-python
+git+https://github.com/Vozf/slide_analysis_nn.git@develop
+git+https://github.com/Vozf/slide_analysis_service.git@develop
