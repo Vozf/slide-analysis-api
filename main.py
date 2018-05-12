@@ -14,7 +14,7 @@ from slide_analysis_service.interface import SlideAnalysisService
 
 from constants import SIMILARITY_MAP_PATH
 
-SLIDE_DIR = '/home/roskach/Whole Slides/'
+SLIDE_DIR = 'C:/Study/Course/slide_analysis/images/'
 SLIDE_CACHE_SIZE = 10
 DEEPZOOM_FORMAT = 'jpeg'
 
@@ -119,13 +119,11 @@ def dzi(path):
 def find_similar(path):
     body = request.get_json()
     img_path = os.path.abspath(os.path.join(app.basedir, path))
-    slide = app.slide_analysis_service.get_slide(img_path,
-                                           app.slide_analysis_service.get_descriptors()[1]())
+    slide = app.slide_analysis_service.get_slide(img_path, body["chosenDescriptor"], body["chosenSimilarity"])
     if not slide.is_ready():
         slide.precalculate()
 
-    similar = slide.find((body["x"], body["y"], body["width"], body["height"]),
-                         app.slide_analysis_service.get_similarities()[1]())
+    similar = slide.find((body["x"], body["y"], body["width"], body["height"]))
     coordinates = []
 
     similar['sim_map'].save(SIMILARITY_MAP_PATH)
@@ -145,9 +143,9 @@ def get_similar_tile(path, col, row):
         # Invalid level orname coordinates
         abort(404)
     buf = BytesIO()
-    tile.save(buf, 'JPEG')
+    tile.save(buf, 'PNG')
     resp = make_response(buf.getvalue())
-    resp.mimetype = 'image/jpg'
+    resp.mimetype = 'image/png'
     return resp
 
 
@@ -155,9 +153,9 @@ def get_similar_tile(path, col, row):
 def get_similarity_map():
     buf = BytesIO()
     map = Image.open(SIMILARITY_MAP_PATH)
-    map.save(buf, 'JPEG')
+    map.save(buf, 'PNG')
     resp = make_response(buf.getvalue())
-    resp.mimetype = 'image/jpg'
+    resp.mimetype = 'image/png'
     return resp
 
 
