@@ -10,8 +10,6 @@ from slide_analysis_api.routes.images.dzi import dzi
 from slide_analysis_api.routes.images.previews import previews
 from slide_analysis_api.routes.images.similar import similar
 
-# from slide_analysis_nn.prediction import Predict
-
 app = Flask(__name__)
 app.config.from_object(__name__)
 

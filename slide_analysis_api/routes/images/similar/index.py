@@ -17,8 +17,6 @@ from slide_analysis_api.constants import (
 )
 from slide_analysis_api.constants import SLIDE_DIR
 
-# from slide_analysis_nn.prediction import Predict
-
 similar = Blueprint('similar', __name__)
 
 
@@ -37,12 +35,12 @@ def find_similar(path):
     if not slide.is_ready():
         slide.precalculate()
 
-    similar = slide.find((body["x"], body["y"], body["width"], body["height"]),
-                         similar.slide_analysis_service.get_similarities()[1]())
+    similar_regions = slide.find((body["x"], body["y"], body["width"], body["height"]),
+                                 similar.slide_analysis_service.get_similarities()[1]())
 
-    similar['sim_map'].save(SIMILARITY_MAP_PATH, 'PNG')
+    similar_regions['sim_map'].save(SIMILARITY_MAP_PATH, 'PNG')
 
-    return jsonify(similar["top_n"])
+    return jsonify(similar_regions["top_n"])
 
 
 @similar.route('/<path:path>/map')

@@ -1,7 +1,3 @@
-from flask import (
-    Blueprint,
-)
-
 from io import BytesIO
 
 from flask import (
@@ -18,8 +14,6 @@ from slide_analysis_api.constants import SLIDE_DIR
 from slide_analysis_api.services.slide_cache.index import (
     _get_slides,
 )
-
-# from slide_analysis_nn.prediction import Predict
 
 previews = Blueprint('previews', __name__)
 

@@ -15,8 +15,6 @@ from slide_analysis_api.services.slide_cache.index import (
     _get_slide,
 )
 
-# from slide_analysis_nn.prediction import Predict
-
 dzi = Blueprint('dzi', __name__)
 
 
