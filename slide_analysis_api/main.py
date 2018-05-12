@@ -7,6 +7,7 @@ from flask import Flask
 
 from slide_analysis_api.routes.images import images
 from slide_analysis_api.routes.images.dzi import dzi
+from slide_analysis_api.routes.images.neural_network_evaluate import neural_network_evaluate
 from slide_analysis_api.routes.images.previews import previews
 from slide_analysis_api.routes.images.similar import similar
 
@@ -17,6 +18,7 @@ app.register_blueprint(images, url_prefix='/images')
 app.register_blueprint(previews, url_prefix='/images/previews')
 app.register_blueprint(similar, url_prefix='/images/similar')
 app.register_blueprint(dzi, url_prefix='/images/dzi')
+app.register_blueprint(neural_network_evaluate, url_prefix='/images/neural_network_evaluate')
 
 
 @app.after_request
