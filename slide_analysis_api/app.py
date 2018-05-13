@@ -29,7 +29,7 @@ def after_request(response):
     return response
 
 
-if __name__ == '__main__':
+def main():
     parser = OptionParser(usage='Usage: %prog [options] [slide-directory]')
     parser.add_option('-l', '--listen', metavar='ADDRESS', dest='host',
                       default='127.0.0.1',
@@ -41,3 +41,6 @@ if __name__ == '__main__':
     (opts, args) = parser.parse_args()
 
     app.run(host=opts.host, port=opts.port, threaded=True)
+
+if __name__ == '__main__':
+    main()
