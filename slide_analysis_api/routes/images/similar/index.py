@@ -29,14 +29,13 @@ def _setup():
 def find_similar(path):
     body = request.get_json()
     img_path = os.path.abspath(os.path.join(SLIDE_DIR, path))
-    slide = similar.slide_analysis_service.get_slide(img_path,
-                                                     similar.slide_analysis_service.get_descriptors()[
-                                                         1]())
+    slide = similar.slide_analysis_service.get_slide(img_path, body["descriptor"])
+
     if not slide.is_ready():
         slide.precalculate()
 
     similar_regions = slide.find((body["x"], body["y"], body["width"], body["height"]),
-                                 similar.slide_analysis_service.get_similarities()[1]())
+                                 body["similarity"])
 
     similar_regions['sim_map'].save(SIMILARITY_MAP_PATH, 'PNG')
 
@@ -56,7 +55,8 @@ def get_similarity_map(path):
 
 @similar.route('/additional_parameters')
 def additional_parameters():
-    descriptors = list(map(lambda x: x.__name__, similar.slide_analysis_service.get_descriptors()))
-    similarities = list(
-        map(lambda x: x.__name__, similar.slide_analysis_service.get_similarities()))
+    descriptors = [{'id': id, 'name': clas.name()} for id, clas in
+                   similar.slide_analysis_service.get_descriptors().items()]
+    similarities = [{'id': id, 'name': clas.name()} for id, clas in
+                    similar.slide_analysis_service.get_similarities().items()]
     return jsonify({"descriptors": descriptors, "similarities": similarities})
