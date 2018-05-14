@@ -54,17 +54,3 @@ def _get_slide(path):
         raise Exception()
     slide = cache.get(path)
     return slide
-
-
-def _get_slides(basedir, relpath=''):
-    children = []
-    for name in sorted(os.listdir(os.path.join(basedir, relpath))):
-        cur_relpath = os.path.join(relpath, name)
-        cur_path = os.path.join(basedir, cur_relpath)
-        if os.path.isdir(cur_path):
-            cur_dir = _get_slides(basedir, cur_relpath)
-            if cur_dir:
-                children.append(cur_dir)
-        elif OpenSlide.detect_format(cur_path):
-            children.append({"name": os.path.basename(cur_path)})
-    return children
