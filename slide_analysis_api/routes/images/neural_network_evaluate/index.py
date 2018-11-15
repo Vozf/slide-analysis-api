@@ -19,13 +19,16 @@ from slide_analysis_api.constants import (
 
 neural_network_evaluate = Blueprint('neural_network_evaluate', __name__)
 
+@neural_network_evaluate.before_app_first_request
+def _setup():
+    neural_network_evaluate.predict = Predict()
 
 @neural_network_evaluate.route('/<path:path>', methods=['POST'])
 def find_neural_network_evaluate(path):
     body = request.get_json()
     img_path = os.path.abspath(os.path.join(SLIDE_DIR, path))
-    prediction = Predict().predict_slide(img_path, area_to_predict=(
-        (body["x"], body["y"]), (body["x"] + body["width"], body["y"] + body["height"])))
+    prediction = neural_network_evaluate.predict.predict_slide(img_path, area_to_predict=(
+        body["x"], body["y"], body["x"] + body["width"], body["y"] + body["height"]))
 
     prediction.create_map(SIMILARITY_MAP_PATH)
 

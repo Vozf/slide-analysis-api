@@ -1,4 +1,4 @@
-# export PYTHONPATH="${PYTHONPATH}:/home/vozman/projects/slides/slide-analysis-service"
+# export PYTHONPATH="${PYTHONPATH}:/D:\projects\slide_analysis_service"
 # export PYTHONPATH="${PYTHONPATH}:/home/vozman/projects/slides/slide_analysis_nn"
 
 from optparse import OptionParser
