@@ -41,10 +41,15 @@ def index():
     return jsonify(_get_slides(SLIDE_DIR))
 
 
-@previews.route('/<path:filename>')
-def get_preview(filename):
+@previews.route('/<path:subdirectory>')
+def get_subdirectory_previews(subdirectory):
+    return jsonify(_get_slides(SLIDE_DIR, subdirectory))
+
+
+@previews.route('/<path:subdirectory>/<path:filename>')
+def get_preview(subdirectory, filename):
     img_io = BytesIO()
-    osr = _get_slide(filename).openslide
+    osr = _get_slide(os.path.join(subdirectory, filename)).openslide
     osr.get_thumbnail((500, 500)).save(img_io, 'JPEG')
     resp = make_response(img_io.getvalue())
     resp.mimetype = 'image/jpg'
