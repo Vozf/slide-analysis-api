@@ -25,6 +25,7 @@ def _setup():
 
 
 def _get_slides(basedir, search='', relpath=''):
+    ### Returns recalculatable=True if in this folder there is a .recalulatable file
     children = []
     for name in sorted(os.listdir(os.path.join(basedir, relpath))):
         cur_relpath = os.path.join(relpath, name)
@@ -32,9 +33,12 @@ def _get_slides(basedir, search='', relpath=''):
         if os.path.isdir(cur_path):
             cur_dir = _get_slides(basedir, search, cur_relpath)
             if cur_dir:
-                children.append({"name": cur_relpath, "children": cur_dir, "is_folder": True})
+                children.append({"name": cur_relpath, "children": cur_dir, "is_folder": True,
+                                 "recalculatable": True if os.path.isfile(
+                                     os.path.join(cur_path, '.recalculate')) else False})
         elif OpenSlide.detect_format(cur_path):
-            children.append({"name": os.path.join(relpath, os.path.basename(cur_path)), "is_folder": False})
+            children.append(
+                {"name": os.path.join(relpath, os.path.basename(cur_path)), "is_folder": False})
     return sorted(filter(lambda x: search in x['name'], children), key=lambda x: x['name'])
 
 

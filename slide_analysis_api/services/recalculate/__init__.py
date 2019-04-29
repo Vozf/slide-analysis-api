@@ -1,0 +1,1 @@
+from slide_analysis_api.services.recalculate.index import recalculate_folder
