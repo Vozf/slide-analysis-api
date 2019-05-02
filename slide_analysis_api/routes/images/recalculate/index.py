@@ -1,22 +1,56 @@
 import os
+import threading
 
 from flask import (
     Blueprint,
+    request,
+    jsonify,
 )
+from tqdm import tqdm
 
 from slide_analysis_api.constants import SLIDE_DIR
 from slide_analysis_api.services.recalculate import recalculate_folder
 
 recalculate = Blueprint('recalculate', __name__)
+recalculate.exporting_threads = {}
 
 
-@recalculate.route('/<path:path>', methods=['PUT'])
-def recalc(path):
-    path = os.path.join(SLIDE_DIR, path)
+@recalculate.route('/', methods=['PUT'])
+def recalc():
+    path = os.path.join(SLIDE_DIR, request.get_json()['folderName'])
     print(f'Recalculating path: {path}')
-    recalculate_folder(path)
-    return '', 204
+    thread = ExportingThread(path)
+    name = thread.getName()
+    recalculate.exporting_threads[name] = thread
+    thread.start()
+    return jsonify({"threadName": name})
 
 
+@recalculate.route('/progress/<string:thread_name>')
+def progress(thread_name):
+    cur_progress = recalculate.exporting_threads[thread_name].progress
+    return jsonify(cur_progress)
 
 
+class ExportingThread(threading.Thread):
+
+    def __init__(self, path):
+        self.progress = {"percent": 0}
+        self.path = path
+        super().__init__()
+
+    def run(self):
+        # Your exporting stuff goes here ...
+        progress = self.progress
+
+        class TqdmSpy(tqdm):
+            @property
+            def n(self):
+                return self.__n
+
+            @n.setter
+            def n(self, value):
+                progress["percent"] = (value / self.total) * 100
+                self.__n = value
+
+        recalculate_folder(self.path, tqdm=TqdmSpy)
