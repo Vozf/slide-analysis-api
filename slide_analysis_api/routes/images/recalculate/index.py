@@ -23,6 +23,7 @@ def recalc():
     name = thread.getName()
     recalculate.exporting_threads[name] = thread
     thread.start()
+
     return jsonify({"threadName": name})
 
 
@@ -30,7 +31,9 @@ def recalc():
 def progress(thread_name):
     if thread_name not in recalculate.exporting_threads:
         return 'No such thread', 404
-    cur_progress = recalculate.exporting_threads[thread_name].progress
+    thread = recalculate.exporting_threads[thread_name]
+    cur_progress = thread.progress
+    cur_progress["isAlive"] = thread.is_alive()
     return jsonify(cur_progress)
 
 

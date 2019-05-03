@@ -5,3 +5,4 @@ descriptor_database
 *.tif
 *.tiff
 *.svs
+.recalculate
