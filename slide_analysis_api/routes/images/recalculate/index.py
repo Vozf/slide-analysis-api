@@ -28,6 +28,8 @@ def recalc():
 
 @recalculate.route('/progress/<string:thread_name>')
 def progress(thread_name):
+    if thread_name not in recalculate.exporting_threads:
+        return 'No such thread', 404
     cur_progress = recalculate.exporting_threads[thread_name].progress
     return jsonify(cur_progress)
 
@@ -35,7 +37,7 @@ def progress(thread_name):
 class ExportingThread(threading.Thread):
 
     def __init__(self, path):
-        self.progress = {"percent": 0}
+        self.progress = {"percent": 0, "current": 0, "total": 0}
         self.path = path
         super().__init__()
 
@@ -50,7 +52,8 @@ class ExportingThread(threading.Thread):
 
             @n.setter
             def n(self, value):
+                progress["current"] = value
+                progress["total"] = self.total
                 progress["percent"] = (value / self.total) * 100
                 self.__n = value
-
         recalculate_folder(self.path, tqdm=TqdmSpy)
