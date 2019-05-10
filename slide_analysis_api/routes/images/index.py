@@ -1,4 +1,5 @@
 from io import BytesIO
+from urllib.parse import unquote
 
 from flask import (
     Blueprint,
@@ -24,13 +25,13 @@ def _setup():
 
 @images.route('/properties/<path:filename>')
 def get_properties(filename):
-    properties = _get_slide(filename).openslide.properties
+    properties = _get_slide(unquote(filename)).openslide.properties
     return jsonify(dict(properties))
 
 
 @images.route('/<path:path>/read_region')
 def read_region(path):
-    slide = _get_slide(path).openslide
+    slide = _get_slide(unquote(path)).openslide
     tile = slide.read_region((int(request.args.get('x')), int(request.args.get('y'))), 0,
                              (int(request.args.get('width')), int(request.args.get('height'))))
 

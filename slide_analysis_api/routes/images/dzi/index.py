@@ -1,4 +1,5 @@
 from io import BytesIO
+from urllib.parse import unquote
 
 from flask import (
     Blueprint,
@@ -20,7 +21,7 @@ dzi = Blueprint('dzi', __name__)
 
 @dzi.route('/<path:path>')
 def get_dzi(path):
-    slide = _get_slide(path).deepzoom
+    slide = _get_slide(unquote(path)).deepzoom
     format = DEEPZOOM_FORMAT
     resp = make_response(slide.get_dzi(format))
     resp.mimetype = 'dzilication/xml'
@@ -29,7 +30,7 @@ def get_dzi(path):
 
 @dzi.route('/<path:path>_files/<int:level>/<int:col>_<int:row>.<format>')
 def tile(path, level, col, row, format):
-    slide = _get_slide(path).deepzoom
+    slide = _get_slide(unquote(path)).deepzoom
     format = format.lower()
     if format != 'jpeg' and format != 'png':
         # Not supported by Deep Zoom
