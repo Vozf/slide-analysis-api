@@ -44,7 +44,7 @@ def _get_slides(basedir, search='', relpath=''):
 
 @previews.route('/')
 def index():
-    search = request.args.get('search')
+    search = request.args.get('search', default='')
     return jsonify(_get_slides(SLIDE_DIR, search))
 
 
